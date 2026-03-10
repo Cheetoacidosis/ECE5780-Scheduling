@@ -60,6 +60,9 @@ int main(int argc, char *argv[]) {
 
         getline(input_file, A);
         periodic_tasks[i].period = stoi(A);
+
+        periodic_tasks[i].preemptions = 0;
+        periodic_tasks[i].missed_deadlines = 0;
     }
 
     //Check if we have any aperiodic tasks to store
@@ -81,12 +84,15 @@ int main(int argc, char *argv[]) {
 
             getline(input_file, A);
             aperiodic_tasks[i].release_time = stoi(A);
+
+            aperiodic_tasks[i].preemptions = 0;
+            aperiodic_tasks[i].missed_deadlines = 0;
         }
     } 
 
 
     //Simulate Rate Monotonic Scheduling, and write the simulation to the output file
-
+    RMScheduler(output_file, num_tasks, sim_time, periodic_tasks);
 
 
     input_file.close();

@@ -1,5 +1,8 @@
-#pragma once
+#ifndef _DATATYPES_H
+#define _DATATYPES_H
+
 #include <string>
+using namespace std;
 
 //Each group is an array of custom struct "Task"
 //Eg. periodic_tasks[] is the array of all periodic tasks
@@ -11,4 +14,8 @@ struct Task {
     int exe_time; //Execution time in msec
     int period; //period T in msec
     int release_time; //Release time in msec
+
+    int preemptions; //Total number of times this task was preempted
+    int missed_deadlines; //Total number of times this task missed a deadline
 };
+#endif
