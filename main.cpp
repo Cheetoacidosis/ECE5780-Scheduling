@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
     //Ensure that exactly 2 command-line arguments have been passed
     if (argc != 3){
         cout << "Incorrect number of input arguments\n";
-        cout << "Please use the format './scheduler input.txt output.txt'";
+        cout << "Please use the format './scheduler input.txt output.txt'\n";
         return 1;
     }
 
@@ -23,13 +23,13 @@ int main(int argc, char *argv[]) {
     //Check that input opened successfully
     input_file.open(input_name);
     if(!input_file.is_open()){
-        cout << "Failed to open input file: " << input_name;
+        cout << "Failed to open input file: " << input_name << endl;
     }
 
     //Check that output opened successfully
     output_file.open(output_name);
     if(!output_file.is_open()){
-        cout << "Failed to create output file: " << input_name;
+        cout << "Failed to create output file: " << input_name << endl;
     }
 
 
@@ -62,10 +62,6 @@ int main(int argc, char *argv[]) {
         periodic_tasks[i].period = stoi(A);
     }
 
-    // cout << periodic_tasks[0].ID << periodic_tasks[1].ID << endl;
-    // cout << periodic_tasks[0].exe_time << periodic_tasks[1].exe_time << endl;
-    // cout << periodic_tasks[0].period << periodic_tasks[1].period << endl;
-
     //Check if we have any aperiodic tasks to store
     num_tasks_string = "0";
     getline(input_file, num_tasks_string); 
@@ -79,21 +75,16 @@ int main(int argc, char *argv[]) {
         for(int i = 0; i < num_tasks_aperiodic; i++){
             getline(input_file, A, ',');
             aperiodic_tasks[i].ID = A;
-            // cout << A << endl;
 
             getline(input_file, A, ',');
             aperiodic_tasks[i].exe_time = stoi(A);
-            // cout << A << endl;
 
             getline(input_file, A);
             aperiodic_tasks[i].release_time = stoi(A);
-            // cout << A << endl;
         }
     } 
 
-    // cout << endl << endl;
 
-    // cout << aperiodic_tasks[0].ID << endl;
 
     input_file.close();
     output_file.close();
