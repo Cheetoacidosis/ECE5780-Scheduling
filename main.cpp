@@ -3,7 +3,7 @@
 #include <string>
 using namespace std;
 #include "RateMonotonic.h"
-#include "main.h"
+#include "datatypes.h"
 
 int main(int argc, char *argv[]) {
     //Ensure that exactly 2 command-line arguments have been passed
@@ -83,6 +83,9 @@ int main(int argc, char *argv[]) {
             aperiodic_tasks[i].release_time = stoi(A);
         }
     } 
+
+
+    //Simulate Rate Monotonic Scheduling, and write the simulation to the output file
 
 
 

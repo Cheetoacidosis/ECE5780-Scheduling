@@ -1,2 +1,2 @@
-scheduler: main.cpp main.h RateMonotonic.cpp RateMonotonic.h
+scheduler: main.cpp datatypes.h RateMonotonic.cpp RateMonotonic.h
 	g++ main.cpp RateMonotonic.cpp --output scheduler
