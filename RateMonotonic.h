@@ -3,11 +3,13 @@
 
 #include <iostream>
 #include <fstream>
+#include <deque> //Double-Ended Queue
 #include "datatypes.h"
 using namespace std;
 
 void testfunc();
 
 void RMScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* periodic_tasks);
+deque<int> UniquePeriods(int num_tasks, Task* tasks);
 
 #endif

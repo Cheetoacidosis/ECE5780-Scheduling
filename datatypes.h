@@ -15,7 +15,11 @@ struct Task {
     int period; //period T in msec
     int release_time; //Release time in msec
 
+    int priority; //The priority of the task. Higher number = higher priority
+
     int preemptions; //Total number of times this task was preempted
     int missed_deadlines; //Total number of times this task missed a deadline
+
+    int remaining_exe_time; //Tracks how long a task has run for. Resets to exe_time and counts down
 };
 #endif

@@ -53,12 +53,15 @@ int main(int argc, char *argv[]) {
     string A;
     for(int i = 0; i < num_tasks; i++){
         getline(input_file, A, ',');
+        // cout << A << ", ";
         periodic_tasks[i].ID = A;
 
         getline(input_file, A, ',');
+        // cout << A << ", ";
         periodic_tasks[i].exe_time = stoi(A);
 
         getline(input_file, A);
+        // cout << A << endl;
         periodic_tasks[i].period = stoi(A);
 
         periodic_tasks[i].preemptions = 0;
