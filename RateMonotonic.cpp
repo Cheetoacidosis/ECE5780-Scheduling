@@ -1,7 +1,10 @@
 #include "RateMonotonic.h"
 #include <algorithm> //for sorting
 
+#define DEBUG(x) output_file<<x<<endl;
+
 void AssignPriorities(int num_tasks, Task* tasks, deque<int> periods_list);
+int HighestAvailableTaskPriority(int max_priority, deque<int> queueArray[]);
 
 void testfunc(){
 
@@ -20,7 +23,7 @@ void RMScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* tasks
     output_file << "#######################################" << endl;
     output_file << "RATE MONOTONIC SCHEDULER" << endl;
     output_file << "#######################################" << endl;
-    output_file << "time, running task" << endl;
+    output_file << "time: running task" << endl;
     output_file << "#######################################" << endl;
 
     // "#! TASK XX PREEMPTED BY TASK YY"
@@ -51,7 +54,69 @@ void RMScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* tasks
     // Simulation
     for (int tick = 0; tick < sim_time; tick++){
 
-        //
+        //Do any "not ready's" need to be moved into ready?
+        ReleasePeriodicTasks();
+
+        //Does the running task complete this tick?
+        if (tasks[running_task].remaining_exe_time <= 0){
+            //Move currently running task to the not ready queue
+            int priority = tasks[running_task].priority;
+            not_readyq[priority].push_back(running_task);
+
+            //Clear the running_task
+            running_task = -1;
+        }
+
+
+        //Does a task miss a deadline this tick?
+            //Yell about it
+
+
+
+        //If not running task, find out if there are any ready and run them
+        if (running_task < 0){
+            //What is highest priority task that is ready?
+            int high_priority = HighestAvailableTaskPriority(max_priority, readyq);
+            
+            // output_file << high_priority << endl;
+            //TODO: if there are any aperiodic tasks that could run, run them and exit this IF
+
+            //Run highest priority task that is ready
+            if (high_priority >= 0){
+                int task_index = readyq[high_priority].front();
+
+                // output_file << task_index << endl;
+
+                readyq[high_priority].pop_front();
+
+                // output_file << readyq[high_priority].front() << endl;
+
+                tasks[task_index].remaining_exe_time = tasks[task_index].exe_time;
+                running_task = task_index;
+            }
+        }
+
+
+
+        //If running a task, 
+            // grab its priority
+            // if any higher priority tasks that should run
+                // Preempt, and change higher priority task to the one that should run
+        
+
+
+        //Decrement remaining_exe_time of running task (if there is a running task)
+        if (running_task >= 0){
+            tasks[running_task].remaining_exe_time -= 1;
+        }
+
+        //Report the time and currently running task 
+        if (running_task < 0){
+            output_file << tick << ":\t" << "NO RUNNING TASK - SLACK\n";
+        } else {
+            //TODO: Check if running task is a periodic or aperiodic task
+            output_file << tick << ":\t" << tasks[running_task].ID << ":\t" << tasks[running_task].remaining_exe_time << endl;
+        }
     }
 
     //Task iterator
@@ -120,6 +185,7 @@ deque<int> UniquePeriods(int num_tasks, Task* tasks){
 }
 
 
+
 void AssignPriorities(int num_tasks, Task* tasks, deque<int> periods_list){
     /*
     Function: AssignPriorities
@@ -140,4 +206,31 @@ void AssignPriorities(int num_tasks, Task* tasks, deque<int> periods_list){
         }
 
     }
+}
+
+
+
+//What is highest priority task that is ready?
+
+            //For every item in Ready queue array. Starting at max_priority and working back
+                //Check if the queue is empty
+                //If not empty, read front
+
+int HighestAvailableTaskPriority(int max_priority, deque<int> queueArray[]){
+    for (int i = max_priority - 1; i >= 0; i--){
+        if(queueArray[i].empty() == false){
+            return i;
+        }
+    }
+    return -1;
+}
+
+
+
+void ReleasePeriodicTasks(){
+    //Go through the notready queues
+        //For every item in notready queue
+            //grab it's period
+            //See if (tick % period == 0)
+            //Move to ready queue if it is ready 
 }
