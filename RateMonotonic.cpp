@@ -1,10 +1,12 @@
 #include "RateMonotonic.h"
 #include <algorithm> //for sorting
+#include <list>
 
-#define DEBUG(x) output_file<<x<<endl;
+#define DEBUG(x) cout<<x<<endl;
 
 void AssignPriorities(int num_tasks, Task* tasks, deque<int> periods_list);
 int HighestAvailableTaskPriority(int max_priority, deque<int> queueArray[]);
+void ReleasePeriodicTasks(int tick, list<int>* not_readyq, deque<int> readyq[], Task* tasks);
 
 void testfunc(){
 
@@ -40,7 +42,7 @@ void RMScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* tasks
     //Eg. readyq[0] is the queue of tasks with priority 0
     //    readyq[0].front() is the next task with priority 0 that should be run
     deque<int>* readyq = new deque<int>[max_priority];
-    deque<int>* not_readyq = new deque<int>[max_priority];
+    list<int> not_readyq = *(new list<int>);
 
 
     // Put every task into the Ready queue ("release" every task)
@@ -54,15 +56,18 @@ void RMScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* tasks
     // Simulation
     for (int tick = 0; tick < sim_time; tick++){
 
+        // DEBUG("STARTING TICK #" << tick)
+
         //Do any "not ready's" need to be moved into ready?
-        ReleasePeriodicTasks();
+        ReleasePeriodicTasks(tick, &not_readyq, readyq, tasks);
 
         //Does the running task complete this tick?
         if (tasks[running_task].remaining_exe_time <= 0){
             //Move currently running task to the not ready queue
             int priority = tasks[running_task].priority;
-            not_readyq[priority].push_back(running_task);
-
+            not_readyq.push_back(running_task);
+            
+            // DEBUG("Added task to not_runningq: " << running_task)
             //Clear the running_task
             running_task = -1;
         }
@@ -227,10 +232,58 @@ int HighestAvailableTaskPriority(int max_priority, deque<int> queueArray[]){
 
 
 
-void ReleasePeriodicTasks(){
-    //Go through the notready queues
+void ReleasePeriodicTasks(int tick, list<int>* not_readyq, deque<int> readyq[], Task* tasks){
         //For every item in notready queue
             //grab it's period
             //See if (tick % period == 0)
             //Move to ready queue if it is ready 
+
+    if (not_readyq->empty() == true){
+        return;
+    }
+
+    list<int>::iterator it;
+
+
+
+    // for (it = not_readyq.begin(); it != not_readyq.end(); it++){
+    //     int task_index = *it;
+        
+    //     cout << "Pre if\n";
+
+    //     //Should the task release on this tick?
+    //     if ((tick % tasks[task_index].period) == 0) {
+    //         //move to ready queue
+    //         int priority = tasks[task_index].priority;
+    //         readyq[priority].push_back(task_index);
+    //         cout << "gay ";
+    //         not_readyq.erase(it);
+    //         cout << "seggs" << endl;
+    //     }
+    // }
+
+    int size = not_readyq->size();
+    // cout << "Starting for loop, tick #" << tick << " size = " << size << endl;
+
+    for (int i = 0; i < size; i++){
+        
+
+        it = not_readyq->begin();
+        advance(it, i);
+
+        int task_index = *it;
+        
+        if ((tick % tasks[task_index].period) == 0) {
+            int priority = tasks[task_index].priority;
+            readyq[priority].push_back(task_index);
+            not_readyq->erase(it);
+            //If we delete something, make sure to keep iterator in exactly the same spot, and decrement size
+            i--;
+            size--;
+            cout << "deleted from notreadyq: " << task_index << endl;
+        }
+    }
+
+    // cout << "boutta return. Size = " << size << endl;
+    return;
 }
