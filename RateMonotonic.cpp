@@ -75,7 +75,25 @@ void RMScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* tasks
 
         //Does a task miss a deadline this tick?
             //Yell about it
+            //It misses a deadline if a task is in "ready" and this tick is mod the period
+        
+            //Loop over every running task priority
+                //Loop over every running task
+                    //check if this tick is 
+        int length = 0;
+        int task_index;
 
+        // for (int i = 0; i < max_priority; i++){
+        //     //Iterate through every priority queue
+        //     length = readyq[i].size();
+        //     for (int k = 0; k < length; k++){
+
+        //         task_index = readyq[i][k];
+        //         if (tick == tasks[task_index].deadline){
+
+        //         }
+        //     }
+        // }
 
 
         //If not running task, find out if there are any ready and run them
@@ -123,17 +141,6 @@ void RMScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* tasks
             output_file << tick << ":\t" << tasks[running_task].ID << ":\t" << tasks[running_task].remaining_exe_time << endl;
         }
     }
-
-    //Task iterator
-    // for (int i = 0; i < num_tasks; i++){
-    //     cout << "Task: " << tasks[i].ID << " Priority: " << tasks[i].priority << endl;
-    // }
-
-        // //See if this worked properly
-    //     int list_size = periods.size();
-    // for (int i = 0; i < list_size; i++){
-    //     cout << "Period: " << periods[i] << endl;
-    // }
 }   
 
 
@@ -275,6 +282,7 @@ void ReleasePeriodicTasks(int tick, list<int>* not_readyq, deque<int> readyq[], 
         
         if ((tick % tasks[task_index].period) == 0) {
             int priority = tasks[task_index].priority;
+            tasks[task_index].deadline = tick + tasks[task_index].period;
             readyq[priority].push_back(task_index);
             not_readyq->erase(it);
             //If we delete something, make sure to keep iterator in exactly the same spot, and decrement size
