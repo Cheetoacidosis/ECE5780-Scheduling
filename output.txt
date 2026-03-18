@@ -605,13 +605,17 @@ time: running task ID
 599:	NO RUNNING TASK - SLACK
 #######################################
 SUMMARY: 
-Task A: # Preemptions 0: # Missed Deadlines 0
-Task B: # Preemptions 0: # Missed Deadlines 0
-Task C: # Preemptions 0: # Missed Deadlines 0
-Task D: # Preemptions 0: # Missed Deadlines 0
-Task E: # Preemptions 0: # Missed Deadlines 0
-Task V: # Preemptions 0: # Missed Deadlines 0: Response Time 45 ms
-Task W: # Preemptions 0: # Missed Deadlines 0: Response Time 15 ms
-Task X: # Preemptions 1: # Missed Deadlines 0: Response Time 150 ms
-Task Y: # Preemptions 0: # Missed Deadlines 0: Response Time 125 ms
-Task Z: # Preemptions 1: # Missed Deadlines 0: Response Time 220 ms
+Task A:	 # Preemptions 0:	 # Missed Deadlines 0
+Task B:	 # Preemptions 0:	 # Missed Deadlines 0
+Task C:	 # Preemptions 0:	 # Missed Deadlines 0
+Task D:	 # Preemptions 0:	 # Missed Deadlines 0
+Task E:	 # Preemptions 0:	 # Missed Deadlines 0
+Task V:	 # Preemptions 0:	 # Missed Deadlines 0:	 Response Time 45 ms
+Task W:	 # Preemptions 0:	 # Missed Deadlines 0:	 Response Time 15 ms
+Task X:	 # Preemptions 1:	 # Missed Deadlines 0:	 Response Time 150 ms
+Task Y:	 # Preemptions 0:	 # Missed Deadlines 0:	 Response Time 125 ms
+Task Z:	 # Preemptions 1:	 # Missed Deadlines 0:	 Response Time 220 ms
+
+TOTALS:
+Total Preemptions: 		2
+Total Missed Deadlines: 0

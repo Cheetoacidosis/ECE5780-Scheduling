@@ -308,16 +308,27 @@ void PrintSummary(ofstream &output_file, Task* tasks, int num_tasks){
     output_file << "#######################################" << endl;
     output_file << "SUMMARY: " << endl;
 
+    int total_preempt, total_miss = 0;
+
     //Task - # of preemptions - # missed deadlines - (aperiod) response time
     for (int i = 0; i < num_tasks; i++){
         output_file << "Task " << tasks[i].ID;
-        output_file << ": # Preemptions " << tasks[i].preemptions;
-        output_file << ": # Missed Deadlines " << tasks[i].missed_deadlines;
+        output_file << ":\t # Preemptions " << tasks[i].preemptions;
+        output_file << ":\t # Missed Deadlines " << tasks[i].missed_deadlines;
 
         if (tasks[i].priority == 0){
-            output_file << ": Response Time " << tasks[i].response_time << " ms";
+            output_file << ":\t Response Time " << tasks[i].response_time << " ms";
         }
 
         output_file << endl;
+
+        total_miss += tasks[i].missed_deadlines;
+        total_preempt += tasks[i].preemptions;
     }
+
+    //Total - # of preemptions - # missed deadlines -
+    output_file << endl;
+    output_file << "TOTALS:" << endl;
+    output_file << "Total Preemptions: \t\t" <<total_preempt << endl;
+    output_file << "Total Missed Deadlines: " << total_miss << endl;
 }
