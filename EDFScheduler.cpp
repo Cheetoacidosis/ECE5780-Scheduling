@@ -2,8 +2,6 @@
 #include <list>
 #include <limits>
 
-using namespace std;
-
 //find task with earliest absolute deadline
 int FindEDFTask(list<int>& readyq, Task* tasks) {
     int earlyBird = -1;
@@ -44,7 +42,7 @@ void EDFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* task
                 //oops there it goes
                 if (tasks[i].remaining_exe_time > 0) {
                     tasks[i].missed_deadlines++;
-                    output_file << "#! TASK " << tasks[i].ID << " Missed deadline\n";
+                    output_file << "! Task " << tasks[i].ID << " Missed deadline\n";
                 }
 
                 //Reset job
@@ -62,7 +60,7 @@ void EDFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* task
         if (running_task != -1 && next_task != -1 &&
             tasks[next_task].deadline < tasks[running_task].deadline) {
 
-            output_file << "#! Task " << tasks[running_task].ID
+            output_file << "! Task " << tasks[running_task].ID
                         << " Preempted by task " << tasks[next_task].ID << "\n";
 
             tasks[running_task].preemptions++;
@@ -80,11 +78,12 @@ void EDFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* task
         if (running_task != -1) {
             tasks[running_task].remaining_exe_time--;
 
-            // Finished execution
-            if (tasks[running_task].remaining_exe_time == 0) {
-                running_task = -1;
-            }
         }
+
+        // //Finished execution
+        // if (tasks[running_task].remaining_exe_time == 0) {
+        //     running_task = -1;
+        // }
 
         //Output
         if (running_task == -1) {
@@ -95,20 +94,10 @@ void EDFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* task
                         << ":\t" 
                         << tasks[running_task].remaining_exe_time << "\n";
         }
-    }
 
-    //int total_preemptions = 0;
-    //int total_misses = 0;
-    //
-    //for (int i = 0; i < num_tasks; i++) {
-    //    output_file << "Task " << tasks[i].ID
-    //                << " | Preemptions: " << tasks[i].preemptions
-    //                << " | Missed Deadlines: " << tasks[i].missed_deadlines << "\n";
-    //
-    //    total_preemptions += tasks[i].preemptions;
-    //    total_misses += tasks[i].missed_deadlines;
-    //}
-    //
-    //output_file << "Total Preemptions: " << total_preemptions << "\n";
-    //output_file << "Total deadline misses: " << total_misses << "\n";
+        //check if finished
+        if(running_task != -1 && tasks[running_task].remaining_exe_time == 0){
+            running_task = -1;
+        }
+    }
 }
