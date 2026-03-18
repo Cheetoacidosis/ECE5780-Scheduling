@@ -3,6 +3,7 @@
 #include <string>
 using namespace std;
 #include "RateMonotonic.h"
+#include "EDFScheduler.h"
 #include "datatypes.h"
 
 int main(int argc, char *argv[]) {
@@ -97,6 +98,8 @@ int main(int argc, char *argv[]) {
     //Simulate Rate Monotonic Scheduling, and write the simulation to the output file
     RMScheduler(output_file, num_tasks, sim_time, periodic_tasks);
 
+    //Simulate EDF scheduling & write to output file
+    //EDFScheduler(output_file, num_tasks, sim_time, periodic_tasks);
 
     input_file.close();
     output_file.close();
