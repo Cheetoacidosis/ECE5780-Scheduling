@@ -7,9 +7,7 @@
 #include "datatypes.h"
 using namespace std;
 
-void testfunc();
-
-void RMScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* periodic_tasks);
+void RMScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic, int sim_time, Task* periodic_tasks, Task* aperiodic_tasks);
 deque<int> UniquePeriods(int num_tasks, Task* tasks);
 
 #endif
