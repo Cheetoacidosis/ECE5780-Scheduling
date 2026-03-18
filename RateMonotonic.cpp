@@ -13,8 +13,6 @@ void testfunc(){
 
     printf("Hey I'm a linked function!\n");
 
-    return;
-}
 
 void RMScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* tasks){
     //Header
