@@ -5,7 +5,7 @@
 #include <deque>
 #include <list>
 #include <algorithm>
-#define DEBUG false
+#define DEBUG true
 
 using namespace std;
 
@@ -33,7 +33,7 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* peri
    
    // Initialize ready and not ready queues
    list<Task> ready;                      //TODO: Ideally, I'd like these to be lists of pointers,
-   list<Task> not_ready;                  //but I can't figure out a convenient way to populate them
+   list<Task> not_ready;                  //but I don't think I have time to refactor shit
    ready.assign(tasks, tasks+num_tasks);
    
    // Schedule tasks
@@ -47,21 +47,16 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* peri
       for (ready_task = ready.begin(); ready_task != ready.end(); ready_task++){
          if (ready_task->deadline < tick){
             ready_task->missed_deadlines++;
+            total_missed_deadlines++;
             ready_task->deadline += ready_task->period;
          }
-         // output_file << "\t" << ready_task->ID << "\n";
       }
       
       // Update ready queue using erase-remove idiom
-      // using remove_if method to move all the ready Tasks to the end and get the new logical end
-      auto new_logical_end = std::remove_if(not_ready.begin(), not_ready.end(), [tick](Task nr_task){return tick % nr_task.period == 0;});
-      
-      // add the newly ready tasks to the ready list
+      list<Task>::iterator new_logical_end = remove_if(not_ready.begin(), not_ready.end(), [tick](Task nr_task){return tick % nr_task.period == 0;});
       for(ready_task = new_logical_end; ready_task != not_ready.end(); ready_task++) {
          ready.push_front(*ready_task);
       }
-
-      // erase newly ready tasks from the not_ready list
       not_ready.erase(new_logical_end, not_ready.end());
       
       // Update task priorities
@@ -82,6 +77,7 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* peri
          }
          output_file << endl << endl;
       }
+
       /***** Get next task *****/
       int curr_task_priority = INT32_MAX;
       if (current_task != NULL) {
@@ -97,17 +93,18 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* peri
          }
       }
 
-      // Move task from ready to current
+      // Update current task
       if (new_curr_task != NULL) {
          if (current_task != NULL) {
             ready.push_front(*current_task);
+            current_task->preemptions++;
+            if (DEBUG) {
+               output_file << current_task->ID << " " << current_task->preemptions << endl;
+            }
+            total_preemptions++;
          }
          current_task = new_curr_task;
          ready.remove_if([&](const Task& t) {return t.ID == new_curr_task->ID;});; // This is really scary, so if tasks are randomly disappearing, this is prob why
-      }
-
-      if (DEBUG) {
-         output_file << curr_task_priority << endl;
       }
 
       // Write to output file
@@ -136,5 +133,17 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* peri
       }
    }
 
+   // Report summary
+   output_file << "################ SUMMARY ################" << endl;
+   for (int i = 0; i < num_tasks; i++) {
+      output_file << "Task ID " << tasks[i].ID << ": ";
+      output_file << tasks[i].preemptions << " preemptions, ";
+      output_file << tasks[i].missed_deadlines << " missed deadlines" << endl;
+   }
+   output_file << "################ TOTALS #################" << endl;
+   output_file << "Total preemptions: " << total_preemptions << endl;
+   output_file << "Total missed deadlines: " << total_missed_deadlines << endl;
+
    delete tasks;
+   return;
 }
