@@ -49,7 +49,10 @@ void EDFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* task
                 tasks[i].remaining_exe_time = tasks[i].exe_time;
                 tasks[i].deadline = tick + tasks[i].period;
 
-                readyq.push_back(i);
+                //fixed
+                if (find(readyq.begin(), readyq.end(), i) == readyq.end()) {
+                    readyq.push_back(i);
+                }
             }
         }
 
@@ -100,4 +103,21 @@ void EDFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* task
             running_task = -1;
         }
     }
+
+    output_file << "\nEDF summary\n";
+
+    int total_preemptions = 0;
+    int total_misses = 0;
+
+    for (int i = 0; i < num_tasks; i++) {
+        output_file << "Task " << tasks[i].ID
+                    << " | Preemptions: " << tasks[i].preemptions
+                    << " | Misses: " << tasks[i].missed_deadlines << "\n";
+
+        total_preemptions += tasks[i].preemptions;
+        total_misses += tasks[i].missed_deadlines;
+    }
+
+    output_file << "Total Preemptions: " << total_preemptions << "\n";
+    output_file << "Total Misses: " << total_misses << "\n";
 }
