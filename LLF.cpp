@@ -5,7 +5,7 @@
 #include <deque>
 #include <list>
 #include <algorithm>
-#define DEBUG true
+#define DEBUG false
 
 using namespace std;
 
@@ -82,39 +82,44 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* peri
          }
          output_file << endl << endl;
       }
-      // Get next task
+      /***** Get next task *****/
       int curr_task_priority = INT32_MAX;
       if (current_task != NULL) {
          curr_task_priority = current_task->priority;
       }
       
+      // Check priority of all ready tasks
       Task* new_curr_task = NULL;
       for (ready_task = ready.begin(); ready_task != ready.end(); ready_task++) {
          if (ready_task->priority < curr_task_priority) {   //NOTE: the lowest number is highest priority, because it indicates how much slack the task has
-            // Move the current task (if there is one) back into ready
-            // TODO: mark task as ready
             new_curr_task = &(*ready_task);
             curr_task_priority = ready_task->priority;
          }
       }
 
+      // Move task from ready to current
       if (new_curr_task != NULL) {
          if (current_task != NULL) {
             ready.push_front(*current_task);
          }
          current_task = new_curr_task;
-         ready.remove(*new_curr_task); // This is really scary, so if tasks are randomly disappearing, this is prob why
+         ready.remove_if([&](const Task& t) {return t.ID == new_curr_task->ID;});; // This is really scary, so if tasks are randomly disappearing, this is prob why
       }
 
       if (DEBUG) {
          output_file << curr_task_priority << endl;
       }
 
-      if (output_file.is_open()) {
-         cout << "YIPPEE" << endl;
-      }
-      else {
-         cout << "not yippee :(" << endl;
+      // Write to output file
+      if (!DEBUG) {
+         output_file << tick << ":\t";
+         if (current_task != NULL) {
+            output_file << current_task->ID << ":\t";
+         }
+         else {
+            output_file << "Nothing :3" << ":\t";
+         }
+         output_file << endl;
       }
 
       // Update execution time of current task
@@ -124,22 +129,10 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* peri
          // Check if task is completed
          if (current_task->remaining_exe_time == 0) {
             current_task->deadline += current_task->period;
+            current_task->remaining_exe_time = current_task->exe_time;
             not_ready.push_front(*current_task);
             current_task = NULL;
          }
-      }
-
-      // Write to output file
-
-      output_file << tick << ":\t";
-      if (current_task != NULL) {
-         output_file << current_task->ID << ":\t";
-      }
-      else {
-         output_file << "Nothing :3" << ":\t";
-      }
-      output_file << endl;
-      if (!DEBUG) {
       }
    }
 
