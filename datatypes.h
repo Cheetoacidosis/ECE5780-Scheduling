@@ -19,6 +19,7 @@ struct Task {
 
     int preemptions; //Total number of times this task was preempted
     int missed_deadlines; //Total number of times this task missed a deadline
+    int response_time; //For aperiodic tasks. How long does it take to finish?
 
     int remaining_exe_time; //Tracks how long a task has run for. Resets to exe_time and counts down
     int deadline;           //Absolute deadline for this task. Set when the task is released

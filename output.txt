@@ -1,205 +1,621 @@
 #######################################
 RATE MONOTONIC SCHEDULER
 #######################################
-time: running task: remaining execution time: deadline
+time: running task ID
 #######################################
-0:	E:	0:	1:	
-1:	A:	1:	5:	
-2:	E:	0:	4:	A was preempted: 
-3:	A:	0:	5:	
-4:	E:	0:	6:	
-5:	B:	1:	5:	B missed a deadline: C missed a deadline: D missed a deadline: 
-6:	E:	0:	8:	B was preempted: 
-7:	B:	0:	5:	
-8:	E:	0:	10:	
-9:	C:	1:	5:	
-10:	E:	0:	12:	C was preempted: 
-11:	C:	0:	5:	
-12:	E:	0:	14:	A missed a deadline: 
-13:	D:	1:	5:	
-14:	E:	0:	16:	D was preempted: 
-15:	D:	0:	5:	
-16:	E:	0:	18:	
-17:	A:	1:	12:	
-18:	E:	0:	20:	B missed a deadline: A was preempted: 
-19:	A:	0:	12:	
-20:	E:	0:	22:	
-21:	B:	1:	18:	
-22:	E:	0:	24:	B was preempted: 
-23:	B:	0:	18:	
-24:	E:	0:	26:	C missed a deadline: D missed a deadline: 
-25:	C:	1:	24:	
-26:	E:	0:	28:	C was preempted: 
-27:	C:	0:	24:	
-28:	E:	0:	30:	
-29:	D:	1:	24:	
-30:	E:	0:	32:	A missed a deadline: D was preempted: 
-31:	D:	0:	24:	
-32:	E:	0:	34:	
-33:	A:	1:	30:	
-34:	E:	0:	36:	A was preempted: 
-35:	A:	0:	30:	
-36:	E:	0:	38:	B missed a deadline: C missed a deadline: 
-37:	B:	1:	36:	
-38:	E:	0:	40:	B was preempted: 
-39:	B:	0:	36:	
-40:	E:	0:	42:	
-41:	C:	1:	36:	
-42:	E:	0:	44:	D missed a deadline: C was preempted: 
-43:	C:	0:	36:	
-44:	E:	0:	46:	
-45:	D:	1:	42:	
-46:	E:	0:	48:	D was preempted: 
-47:	D:	0:	42:	
-48:	E:	0:	50:	A missed a deadline: B missed a deadline: 
-49:	A:	1:	48:	
-50:	E:	0:	52:	A was preempted: 
-51:	A:	0:	48:	
-52:	E:	0:	54:	
-53:	B:	1:	48:	
-54:	E:	0:	56:	C missed a deadline: B was preempted: 
-55:	B:	0:	48:	
-56:	E:	0:	58:	
-57:	C:	1:	54:	
-58:	E:	0:	60:	C was preempted: 
-59:	C:	0:	54:	
-60:	E:	0:	62:	D missed a deadline: A missed a deadline: 
-61:	D:	1:	60:	
-62:	E:	0:	64:	D was preempted: 
-63:	D:	0:	60:	
-64:	E:	0:	66:	
-65:	A:	1:	60:	
-66:	E:	0:	68:	B missed a deadline: A was preempted: 
-67:	A:	0:	60:	
-68:	E:	0:	70:	
-69:	B:	1:	66:	
-70:	E:	0:	72:	B was preempted: 
-71:	B:	0:	66:	
-72:	E:	0:	74:	C missed a deadline: D missed a deadline: 
-73:	C:	1:	72:	
-74:	E:	0:	76:	C was preempted: 
-75:	C:	0:	72:	
-76:	E:	0:	78:	
-77:	D:	1:	72:	
-78:	E:	0:	80:	A missed a deadline: D was preempted: 
-79:	D:	0:	72:	
-80:	E:	0:	82:	
-81:	A:	1:	78:	
-82:	E:	0:	84:	A was preempted: 
-83:	A:	0:	78:	
-84:	E:	0:	86:	B missed a deadline: C missed a deadline: 
-85:	B:	1:	84:	
-86:	E:	0:	88:	B was preempted: 
-87:	B:	0:	84:	
-88:	E:	0:	90:	
-89:	C:	1:	84:	
-90:	E:	0:	92:	D missed a deadline: C was preempted: 
-91:	C:	0:	84:	
-92:	E:	0:	94:	
-93:	D:	1:	90:	
-94:	E:	0:	96:	D was preempted: 
-95:	D:	0:	90:	
-96:	E:	0:	98:	A missed a deadline: B missed a deadline: 
-97:	A:	1:	96:	
-98:	E:	0:	100:	A was preempted: 
-99:	A:	0:	96:	
-100:	E:	0:	102:	
-101:	B:	1:	96:	
-102:	E:	0:	104:	C missed a deadline: B was preempted: 
-103:	B:	0:	96:	
-104:	E:	0:	106:	
-105:	C:	1:	102:	
-106:	E:	0:	108:	C was preempted: 
-107:	C:	0:	102:	
-108:	E:	0:	110:	D missed a deadline: A missed a deadline: 
-109:	D:	1:	108:	
-110:	E:	0:	112:	D was preempted: 
-111:	D:	0:	108:	
-112:	E:	0:	114:	
-113:	A:	1:	108:	
-114:	E:	0:	116:	B missed a deadline: A was preempted: 
-115:	A:	0:	108:	
-116:	E:	0:	118:	
-117:	B:	1:	114:	
-118:	E:	0:	120:	B was preempted: 
-119:	B:	0:	114:	
-120:	E:	0:	122:	C missed a deadline: D missed a deadline: 
-121:	C:	1:	120:	
-122:	E:	0:	124:	C was preempted: 
-123:	C:	0:	120:	
-124:	E:	0:	126:	
-125:	D:	1:	120:	
-126:	E:	0:	128:	A missed a deadline: D was preempted: 
-127:	D:	0:	120:	
-128:	E:	0:	130:	
-129:	A:	1:	126:	
-130:	E:	0:	132:	A was preempted: 
-131:	A:	0:	126:	
-132:	E:	0:	134:	B missed a deadline: C missed a deadline: 
-133:	B:	1:	132:	
-134:	E:	0:	136:	B was preempted: 
-135:	B:	0:	132:	
-136:	E:	0:	138:	
-137:	C:	1:	132:	
-138:	E:	0:	140:	D missed a deadline: C was preempted: 
-139:	C:	0:	132:	
-140:	E:	0:	142:	
-141:	D:	1:	138:	
-142:	E:	0:	144:	D was preempted: 
-143:	D:	0:	138:	
-144:	E:	0:	146:	A missed a deadline: B missed a deadline: 
-145:	A:	1:	144:	
-146:	E:	0:	148:	A was preempted: 
-147:	A:	0:	144:	
-148:	E:	0:	150:	
-149:	B:	1:	144:	
-150:	E:	0:	152:	C missed a deadline: B was preempted: 
-151:	B:	0:	144:	
-152:	E:	0:	154:	
-153:	C:	1:	150:	
-154:	E:	0:	156:	C was preempted: 
-155:	C:	0:	150:	
-156:	E:	0:	158:	D missed a deadline: A missed a deadline: 
-157:	D:	1:	156:	
-158:	E:	0:	160:	D was preempted: 
-159:	D:	0:	156:	
-160:	E:	0:	162:	
-161:	A:	1:	156:	
-162:	E:	0:	164:	B missed a deadline: A was preempted: 
-163:	A:	0:	156:	
-164:	E:	0:	166:	
-165:	B:	1:	162:	
-166:	E:	0:	168:	B was preempted: 
-167:	B:	0:	162:	
-168:	E:	0:	170:	C missed a deadline: D missed a deadline: 
-169:	C:	1:	168:	
-170:	E:	0:	172:	C was preempted: 
-171:	C:	0:	168:	
-172:	E:	0:	174:	
-173:	D:	1:	168:	
-174:	E:	0:	176:	A missed a deadline: D was preempted: 
-175:	D:	0:	168:	
-176:	E:	0:	178:	
-177:	A:	1:	174:	
-178:	E:	0:	180:	A was preempted: 
-179:	A:	0:	174:	
-180:	E:	0:	182:	B missed a deadline: C missed a deadline: 
-181:	B:	1:	180:	
-182:	E:	0:	184:	B was preempted: 
-183:	B:	0:	180:	
-184:	E:	0:	186:	
-185:	C:	1:	180:	
-186:	E:	0:	188:	D missed a deadline: C was preempted: 
-187:	C:	0:	180:	
-188:	E:	0:	190:	
-189:	D:	1:	186:	
-190:	E:	0:	192:	D was preempted: 
-191:	D:	0:	186:	
-192:	E:	0:	194:	A missed a deadline: B missed a deadline: 
-193:	A:	1:	192:	
-194:	E:	0:	196:	A was preempted: 
-195:	A:	0:	192:	
-196:	E:	0:	198:	
-197:	B:	1:	192:	
-198:	E:	0:	200:	C missed a deadline: B was preempted: 
-199:	B:	0:	192:	
+0:	A:	
+1:	A:	
+2:	A:	
+3:	A:	
+4:	A:	
+5:	A:	
+6:	A:	
+7:	A:	
+8:	A:	
+9:	A:	
+10:	B:	
+11:	B:	
+12:	B:	
+13:	B:	
+14:	B:	
+15:	B:	
+16:	B:	
+17:	B:	
+18:	B:	
+19:	B:	
+20:	B:	
+21:	B:	
+22:	B:	
+23:	B:	
+24:	B:	
+25:	C:	
+26:	C:	
+27:	C:	
+28:	C:	
+29:	C:	
+30:	C:	
+31:	C:	
+32:	C:	
+33:	C:	
+34:	C:	
+35:	C:	
+36:	C:	
+37:	C:	
+38:	C:	
+39:	C:	
+40:	C:	
+41:	C:	
+42:	C:	
+43:	C:	
+44:	C:	
+45:	D:	
+46:	D:	
+47:	D:	
+48:	D:	
+49:	D:	
+50:	D:	
+51:	D:	
+52:	D:	
+53:	D:	
+54:	D:	
+55:	D:	
+56:	D:	
+57:	D:	
+58:	D:	
+59:	D:	
+60:	D:	
+61:	D:	
+62:	D:	
+63:	D:	
+64:	D:	
+65:	D:	
+66:	D:	
+67:	D:	
+68:	D:	
+69:	D:	
+70:	D:	
+71:	D:	
+72:	D:	
+73:	D:	
+74:	D:	
+75:	E:	
+76:	E:	
+77:	E:	
+78:	E:	
+79:	E:	
+80:	E:	
+81:	E:	
+82:	E:	
+83:	E:	
+84:	E:	
+85:	E:	
+86:	E:	
+87:	E:	
+88:	E:	
+89:	E:	
+90:	E:	
+91:	E:	
+92:	E:	
+93:	E:	
+94:	E:	
+95:	V:	
+96:	V:	
+97:	V:	
+98:	V:	
+99:	V:	
+100:	A:	
+101:	A:	
+102:	A:	
+103:	A:	
+104:	A:	
+105:	A:	
+106:	A:	
+107:	A:	
+108:	A:	
+109:	A:	
+110:	B:	
+111:	B:	
+112:	B:	
+113:	B:	
+114:	B:	
+115:	B:	
+116:	B:	
+117:	B:	
+118:	B:	
+119:	B:	
+120:	B:	
+121:	B:	
+122:	B:	
+123:	B:	
+124:	B:	
+125:	C:	
+126:	C:	
+127:	C:	
+128:	C:	
+129:	C:	
+130:	C:	
+131:	C:	
+132:	C:	
+133:	C:	
+134:	C:	
+135:	C:	
+136:	C:	
+137:	C:	
+138:	C:	
+139:	C:	
+140:	C:	
+141:	C:	
+142:	C:	
+143:	C:	
+144:	C:	
+145:	D:	
+146:	D:	
+147:	D:	
+148:	D:	
+149:	D:	
+150:	D:	
+151:	D:	
+152:	D:	
+153:	D:	
+154:	D:	
+155:	D:	
+156:	D:	
+157:	D:	
+158:	D:	
+159:	D:	
+160:	D:	
+161:	D:	
+162:	D:	
+163:	D:	
+164:	D:	
+165:	D:	
+166:	D:	
+167:	D:	
+168:	D:	
+169:	D:	
+170:	D:	
+171:	D:	
+172:	D:	
+173:	D:	
+174:	D:	
+175:	W:	
+176:	W:	
+177:	W:	
+178:	W:	
+179:	W:	
+180:	W:	
+181:	W:	
+182:	W:	
+183:	W:	
+184:	W:	
+185:	W:	
+186:	W:	
+187:	W:	
+188:	W:	
+189:	W:	
+190:	NO RUNNING TASK - SLACK
+191:	NO RUNNING TASK - SLACK
+192:	NO RUNNING TASK - SLACK
+193:	NO RUNNING TASK - SLACK
+194:	NO RUNNING TASK - SLACK
+195:	NO RUNNING TASK - SLACK
+196:	NO RUNNING TASK - SLACK
+197:	NO RUNNING TASK - SLACK
+198:	NO RUNNING TASK - SLACK
+199:	NO RUNNING TASK - SLACK
+200:	A:	
+201:	A:	
+202:	A:	
+203:	A:	
+204:	A:	
+205:	A:	
+206:	A:	
+207:	A:	
+208:	A:	
+209:	A:	
+210:	B:	
+211:	B:	
+212:	B:	
+213:	B:	
+214:	B:	
+215:	B:	
+216:	B:	
+217:	B:	
+218:	B:	
+219:	B:	
+220:	B:	
+221:	B:	
+222:	B:	
+223:	B:	
+224:	B:	
+225:	C:	
+226:	C:	
+227:	C:	
+228:	C:	
+229:	C:	
+230:	C:	
+231:	C:	
+232:	C:	
+233:	C:	
+234:	C:	
+235:	C:	
+236:	C:	
+237:	C:	
+238:	C:	
+239:	C:	
+240:	C:	
+241:	C:	
+242:	C:	
+243:	C:	
+244:	C:	
+245:	D:	
+246:	D:	
+247:	D:	
+248:	D:	
+249:	D:	
+250:	D:	
+251:	D:	
+252:	D:	
+253:	D:	
+254:	D:	
+255:	D:	
+256:	D:	
+257:	D:	
+258:	D:	
+259:	D:	
+260:	D:	
+261:	D:	
+262:	D:	
+263:	D:	
+264:	D:	
+265:	D:	
+266:	D:	
+267:	D:	
+268:	D:	
+269:	D:	
+270:	D:	
+271:	D:	
+272:	D:	
+273:	D:	
+274:	D:	
+275:	E:	
+276:	E:	
+277:	E:	
+278:	E:	
+279:	E:	
+280:	E:	
+281:	E:	
+282:	E:	
+283:	E:	
+284:	E:	
+285:	E:	
+286:	E:	
+287:	E:	
+288:	E:	
+289:	E:	
+290:	E:	
+291:	E:	
+292:	E:	
+293:	E:	
+294:	E:	
+295:	X:	
+296:	X:	
+297:	X:	
+298:	X:	
+299:	X:	
+300:	A:	X was preempted: 
+301:	A:	
+302:	A:	
+303:	A:	
+304:	A:	
+305:	A:	
+306:	A:	
+307:	A:	
+308:	A:	
+309:	A:	
+310:	B:	
+311:	B:	
+312:	B:	
+313:	B:	
+314:	B:	
+315:	B:	
+316:	B:	
+317:	B:	
+318:	B:	
+319:	B:	
+320:	B:	
+321:	B:	
+322:	B:	
+323:	B:	
+324:	B:	
+325:	C:	
+326:	C:	
+327:	C:	
+328:	C:	
+329:	C:	
+330:	C:	
+331:	C:	
+332:	C:	
+333:	C:	
+334:	C:	
+335:	C:	
+336:	C:	
+337:	C:	
+338:	C:	
+339:	C:	
+340:	C:	
+341:	C:	
+342:	C:	
+343:	C:	
+344:	C:	
+345:	D:	
+346:	D:	
+347:	D:	
+348:	D:	
+349:	D:	
+350:	D:	
+351:	D:	
+352:	D:	
+353:	D:	
+354:	D:	
+355:	D:	
+356:	D:	
+357:	D:	
+358:	D:	
+359:	D:	
+360:	D:	
+361:	D:	
+362:	D:	
+363:	D:	
+364:	D:	
+365:	D:	
+366:	D:	
+367:	D:	
+368:	D:	
+369:	D:	
+370:	D:	
+371:	D:	
+372:	D:	
+373:	D:	
+374:	D:	
+375:	X:	
+376:	X:	
+377:	X:	
+378:	X:	
+379:	X:	
+380:	Y:	
+381:	Y:	
+382:	Y:	
+383:	Y:	
+384:	Y:	
+385:	Y:	
+386:	Y:	
+387:	Y:	
+388:	Y:	
+389:	Y:	
+390:	Z:	
+391:	Z:	
+392:	Z:	
+393:	Z:	
+394:	Z:	
+395:	Z:	
+396:	Z:	
+397:	Z:	
+398:	Z:	
+399:	Z:	
+400:	A:	Z was preempted: 
+401:	A:	
+402:	A:	
+403:	A:	
+404:	A:	
+405:	A:	
+406:	A:	
+407:	A:	
+408:	A:	
+409:	A:	
+410:	B:	
+411:	B:	
+412:	B:	
+413:	B:	
+414:	B:	
+415:	B:	
+416:	B:	
+417:	B:	
+418:	B:	
+419:	B:	
+420:	B:	
+421:	B:	
+422:	B:	
+423:	B:	
+424:	B:	
+425:	C:	
+426:	C:	
+427:	C:	
+428:	C:	
+429:	C:	
+430:	C:	
+431:	C:	
+432:	C:	
+433:	C:	
+434:	C:	
+435:	C:	
+436:	C:	
+437:	C:	
+438:	C:	
+439:	C:	
+440:	C:	
+441:	C:	
+442:	C:	
+443:	C:	
+444:	C:	
+445:	D:	
+446:	D:	
+447:	D:	
+448:	D:	
+449:	D:	
+450:	D:	
+451:	D:	
+452:	D:	
+453:	D:	
+454:	D:	
+455:	D:	
+456:	D:	
+457:	D:	
+458:	D:	
+459:	D:	
+460:	D:	
+461:	D:	
+462:	D:	
+463:	D:	
+464:	D:	
+465:	D:	
+466:	D:	
+467:	D:	
+468:	D:	
+469:	D:	
+470:	D:	
+471:	D:	
+472:	D:	
+473:	D:	
+474:	D:	
+475:	E:	
+476:	E:	
+477:	E:	
+478:	E:	
+479:	E:	
+480:	E:	
+481:	E:	
+482:	E:	
+483:	E:	
+484:	E:	
+485:	E:	
+486:	E:	
+487:	E:	
+488:	E:	
+489:	E:	
+490:	E:	
+491:	E:	
+492:	E:	
+493:	E:	
+494:	E:	
+495:	Z:	
+496:	Z:	
+497:	Z:	
+498:	Z:	
+499:	Z:	
+500:	A:	
+501:	A:	
+502:	A:	
+503:	A:	
+504:	A:	
+505:	A:	
+506:	A:	
+507:	A:	
+508:	A:	
+509:	A:	
+510:	B:	
+511:	B:	
+512:	B:	
+513:	B:	
+514:	B:	
+515:	B:	
+516:	B:	
+517:	B:	
+518:	B:	
+519:	B:	
+520:	B:	
+521:	B:	
+522:	B:	
+523:	B:	
+524:	B:	
+525:	C:	
+526:	C:	
+527:	C:	
+528:	C:	
+529:	C:	
+530:	C:	
+531:	C:	
+532:	C:	
+533:	C:	
+534:	C:	
+535:	C:	
+536:	C:	
+537:	C:	
+538:	C:	
+539:	C:	
+540:	C:	
+541:	C:	
+542:	C:	
+543:	C:	
+544:	C:	
+545:	D:	
+546:	D:	
+547:	D:	
+548:	D:	
+549:	D:	
+550:	D:	
+551:	D:	
+552:	D:	
+553:	D:	
+554:	D:	
+555:	D:	
+556:	D:	
+557:	D:	
+558:	D:	
+559:	D:	
+560:	D:	
+561:	D:	
+562:	D:	
+563:	D:	
+564:	D:	
+565:	D:	
+566:	D:	
+567:	D:	
+568:	D:	
+569:	D:	
+570:	D:	
+571:	D:	
+572:	D:	
+573:	D:	
+574:	D:	
+575:	NO RUNNING TASK - SLACK
+576:	NO RUNNING TASK - SLACK
+577:	NO RUNNING TASK - SLACK
+578:	NO RUNNING TASK - SLACK
+579:	NO RUNNING TASK - SLACK
+580:	NO RUNNING TASK - SLACK
+581:	NO RUNNING TASK - SLACK
+582:	NO RUNNING TASK - SLACK
+583:	NO RUNNING TASK - SLACK
+584:	NO RUNNING TASK - SLACK
+585:	NO RUNNING TASK - SLACK
+586:	NO RUNNING TASK - SLACK
+587:	NO RUNNING TASK - SLACK
+588:	NO RUNNING TASK - SLACK
+589:	NO RUNNING TASK - SLACK
+590:	NO RUNNING TASK - SLACK
+591:	NO RUNNING TASK - SLACK
+592:	NO RUNNING TASK - SLACK
+593:	NO RUNNING TASK - SLACK
+594:	NO RUNNING TASK - SLACK
+595:	NO RUNNING TASK - SLACK
+596:	NO RUNNING TASK - SLACK
+597:	NO RUNNING TASK - SLACK
+598:	NO RUNNING TASK - SLACK
+599:	NO RUNNING TASK - SLACK
+#######################################
+SUMMARY: 
+Task A:	 # Preemptions 0:	 # Missed Deadlines 0
+Task B:	 # Preemptions 0:	 # Missed Deadlines 0
+Task C:	 # Preemptions 0:	 # Missed Deadlines 0
+Task D:	 # Preemptions 0:	 # Missed Deadlines 0
+Task E:	 # Preemptions 0:	 # Missed Deadlines 0
+Task V:	 # Preemptions 0:	 # Missed Deadlines 0:	 Response Time 45 ms
+Task W:	 # Preemptions 0:	 # Missed Deadlines 0:	 Response Time 15 ms
+Task X:	 # Preemptions 1:	 # Missed Deadlines 0:	 Response Time 150 ms
+Task Y:	 # Preemptions 0:	 # Missed Deadlines 0:	 Response Time 125 ms
+Task Z:	 # Preemptions 1:	 # Missed Deadlines 0:	 Response Time 220 ms
+
+TOTALS:
+Total Preemptions: 		2
+Total Missed Deadlines: 0

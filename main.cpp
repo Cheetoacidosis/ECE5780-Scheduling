@@ -4,6 +4,7 @@
 using namespace std;
 #include "RateMonotonic.h"
 #include "EDFScheduler.h"
+#include "LLF.h"
 #include "datatypes.h"
 
 int main(int argc, char *argv[]) {
@@ -94,12 +95,14 @@ int main(int argc, char *argv[]) {
         }
     } 
 
-
     //Simulate Rate Monotonic Scheduling, and write the simulation to the output file
-    RMScheduler(output_file, num_tasks, sim_time, periodic_tasks);
+    RMScheduler(output_file, num_tasks, num_tasks_aperiodic, sim_time, periodic_tasks, aperiodic_tasks);
 
     //Simulate EDF scheduling & write to output file
-    //EDFScheduler(output_file, num_tasks, sim_time, periodic_tasks);
+    // EDFScheduler(output_file, num_tasks, sim_time, periodic_tasks);
+
+    //Simulate LLF scheduling and write to output file
+    // LLFScheduler(output_file, num_tasks, sim_time, periodic_tasks);
 
     input_file.close();
     output_file.close();

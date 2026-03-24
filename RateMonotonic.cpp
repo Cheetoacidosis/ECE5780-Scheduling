@@ -7,42 +7,48 @@
 
 void AssignPriorities(int num_tasks, Task* tasks, deque<int> periods_list);
 int HighestAvailableTaskPriority(int max_priority, deque<int> queueArray[]);
-void ReleasePeriodicTasks(int tick, list<int>* not_readyq, deque<int> readyq[], Task* tasks);
+void ReleaseTasks(int tick, list<int>* not_readyq, deque<int> readyq[], Task* tasks);
+void PrintSummary(ofstream &output_file, Task* tasks, int num_tasks);
 
-void testfunc(){
-
-    printf("Hey I'm a linked function!\n");
-
-    return;
-}
-
-void RMScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* tasks){
+void RMScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic, int sim_time, Task* periodic_tasks, Task* aptasks){
     //Header
     output_file << "#######################################" << endl;
     output_file << "RATE MONOTONIC SCHEDULER" << endl;
     output_file << "#######################################" << endl;
-    output_file << "time: running task: remaining execution time: deadline" << endl;
+    output_file << "time: running task ID" << endl;
     output_file << "#######################################" << endl;
 
+    //Combine periodic and aperiodic tasks into one array, "tasks"
+    Task* tasks = new Task[num_tasks + num_tasks_aperiodic];
+    copy(periodic_tasks, periodic_tasks + num_tasks, tasks);
+    copy(aptasks, aptasks + num_tasks_aperiodic, tasks + num_tasks);
 
     //Determine priorities
-    deque<int> periods = UniquePeriods(num_tasks, tasks);
-    int max_priority = periods.size();
-    AssignPriorities(num_tasks, tasks, periods);
+    deque<int> periods = UniquePeriods(num_tasks, periodic_tasks);
+    int max_priority = periods.size() + 1;
+    AssignPriorities(num_tasks + num_tasks_aperiodic, tasks, periods);
 
     //Create arrays of "Ready" and "Not Ready" Queues
     //Priorities are baked in by the position of the queue
     //Eg. readyq[0] is the queue of tasks with priority 0
     //    readyq[0].front() is the next task with priority 0 that should be run
-    deque<int>* readyq = new deque<int>[max_priority];
+    deque<int>* readyq = new deque<int>[max_priority + 1];
     list<int> not_readyq = *(new list<int>);
+    deque<int> aperiod_readyq = *(new deque<int>);
 
 
     // Put every task into the Ready queue ("release" every task)
-    for (int i = 0; i < num_tasks; i++){
-        readyq[tasks[i].priority].push_back(i);
-        tasks[i].deadline = tasks[i].period - 1;
-        tasks[i].remaining_exe_time = tasks[i].exe_time;
+    for (int i = 0; i < num_tasks + num_tasks_aperiodic; i++){
+        //If task is aperiodic, put into notreadyq instead
+        int pri = tasks[i].priority;
+        if (pri == 0){
+            not_readyq.push_back(i);
+        }
+        else { 
+            readyq[pri].push_back(i);
+            tasks[i].deadline = tasks[i].period - 1;
+            tasks[i].remaining_exe_time = tasks[i].exe_time;
+        }
     }
 
     // Stores the index of the currently running task
@@ -55,15 +61,18 @@ void RMScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* tasks
         missed_deadlines_string = "";
 
         //Do any "not ready's" need to be moved into ready?
-        ReleasePeriodicTasks(tick, &not_readyq, readyq, tasks);
+        ReleaseTasks(tick, &not_readyq, readyq, tasks);
 
         //Does the running task complete this tick?
         if (tasks[running_task].remaining_exe_time <= 0){
             //Move currently running task to the not ready queue
             int priority = tasks[running_task].priority;
             not_readyq.push_back(running_task);
+            //If aperiodic, track the response time
+            if (priority == 0){
+                tasks[running_task].response_time = tick - tasks[running_task].release_time;
+            }
             
-            // DEBUG("Added task to not_runningq: " << running_task)
             //Clear the running_task
             running_task = -1;
         }
@@ -91,33 +100,18 @@ void RMScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* tasks
 
         //If not running task, find out if there are any ready and run them
         if (running_task < 0){
-            //What is highest priority task that is ready?
+
             int high_priority = HighestAvailableTaskPriority(max_priority, readyq);
-            
-            // output_file << high_priority << endl;
-            //TODO: if there are any aperiodic tasks that could run, run them and exit this IF
 
             //Run highest priority task that is ready
             if (high_priority >= 0){
                 int task_index = readyq[high_priority].front();
-
-                // output_file << task_index << endl;
-
                 readyq[high_priority].pop_front();
-
-                // output_file << readyq[high_priority].front() << endl;
-
-                // tasks[task_index].remaining_exe_time = tasks[task_index].exe_time;
                 running_task = task_index;
             }
         }
 
 
-
-        //If running a task, 
-            // grab its priority
-            // if any higher priority tasks that should run
-                // Preempt, and change higher priority task to the one that should run
         //Preemption - is there an available task of higher priority?
         else {
             int high_priority = HighestAvailableTaskPriority(max_priority, readyq);
@@ -143,10 +137,13 @@ void RMScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* tasks
             output_file << tick << ":\t" << "NO RUNNING TASK - SLACK\n";
         } else {
             //TODO: Check if running task is a periodic or aperiodic task
-            output_file << tick << ":\t" << tasks[running_task].ID << ":\t" << tasks[running_task].remaining_exe_time << ":\t" << tasks[running_task].deadline << ":\t" << missed_deadlines_string << endl;
-            // output_file << tick << ":\t" << tasks[running_task].ID << ":\t" << missed_deadlines_string << endl;
+            // output_file << tick << ":\t" << tasks[running_task].ID << ":\t" << tasks[running_task].remaining_exe_time << ":\t" << tasks[running_task].deadline << ":\t" << missed_deadlines_string << endl;
+            output_file << tick << ":\t" << tasks[running_task].ID << ":\t" << missed_deadlines_string << endl;
         }
     }
+
+    PrintSummary(output_file, tasks, num_tasks + num_tasks_aperiodic);
+
 }   
 
 
@@ -204,20 +201,27 @@ void AssignPriorities(int num_tasks, Task* tasks, deque<int> periods_list){
     Function: AssignPriorities
 
     Every task is given a priority. 
-    The priority is added to the task struct's member variable "priority"
+    The priority is added to the task struct's property "priority"
     Priorities are zero-indexed
     */
 
     //For each task
     for (int i = 0; i < num_tasks; i++){
-        
-        //Find task's matching period & assign priority 
-        for (int k=0; k < periods_list.size(); k++){
-            if (tasks[i].period == periods_list[k]){
-                tasks[i].priority = k;
-            }
-        }
+        //Sort periodic from nonperiodic
 
+        //Periodic tasks
+        if ((tasks[i].period != 0) && (tasks[i].release_time == 0)){
+            //Find task's matching period & assign priority 
+            for (int k=0; k < periods_list.size(); k++){
+                if (tasks[i].period == periods_list[k]){
+                    tasks[i].priority = k + 1;
+                }
+            }
+        } 
+        //Aperiodic tasks
+        else {
+            tasks[i].priority = 0;
+        }
     }
 }
 
@@ -241,13 +245,16 @@ int HighestAvailableTaskPriority(int max_priority, deque<int> queueArray[]){
 
 
 
-void ReleasePeriodicTasks(int tick, list<int>* not_readyq, deque<int> readyq[], Task* tasks){
+void ReleaseTasks(int tick, list<int>* not_readyq, deque<int> readyq[], Task* tasks){
     /*
-    Function: ReleasePeriodicTasks
+    Function: ReleaseTasks
 
     Moves periodic tasks from the not_readyq into their repective readyq's
     Only "releases" a periodic task if the current tick is N*period
+
+    Releases aperiodic tasks when theyre ready
     */
+
 
     if (not_readyq->empty() == true){
         return;
@@ -255,7 +262,7 @@ void ReleasePeriodicTasks(int tick, list<int>* not_readyq, deque<int> readyq[], 
 
     list<int>::iterator it;
     int size = not_readyq->size();
-    // cout << "Starting for loop, tick #" << tick << " size = " << size << endl;
+    
 
     for (int i = 0; i < size; i++){
         
@@ -265,7 +272,22 @@ void ReleasePeriodicTasks(int tick, list<int>* not_readyq, deque<int> readyq[], 
 
         int task_index = *it;
         
-        if ((tick % tasks[task_index].period) == 0) {
+        //Aperiodic task that should be released this tick
+        if (tasks[task_index].priority == 0){
+            if (tasks[task_index].release_time == tick){
+                tasks[task_index].deadline = tick + 500;
+                tasks[task_index].remaining_exe_time = tasks[task_index].exe_time;
+                readyq[0].push_back(task_index);
+                not_readyq->erase(it);
+
+                //If we delete something, make sure to keep iterator in exactly the same spot, and decrement size
+                i--;
+                size--;
+            }
+        }
+        //Periodic task that should be released this tick
+        else if ((tick % tasks[task_index].period) == 0) {
+
             int priority = tasks[task_index].priority;
             tasks[task_index].deadline = tick + tasks[task_index].period;
             tasks[task_index].remaining_exe_time = tasks[task_index].exe_time;
@@ -274,10 +296,39 @@ void ReleasePeriodicTasks(int tick, list<int>* not_readyq, deque<int> readyq[], 
             //If we delete something, make sure to keep iterator in exactly the same spot, and decrement size
             i--;
             size--;
-            // cout << "deleted from notreadyq: " << task_index << endl;
         }
     }
 
-    // cout << "boutta return. Size = " << size << endl;
+
     return;
+}
+
+
+void PrintSummary(ofstream &output_file, Task* tasks, int num_tasks){
+    output_file << "#######################################" << endl;
+    output_file << "SUMMARY: " << endl;
+
+    int total_preempt, total_miss = 0;
+
+    //Task - # of preemptions - # missed deadlines - (aperiod) response time
+    for (int i = 0; i < num_tasks; i++){
+        output_file << "Task " << tasks[i].ID;
+        output_file << ":\t # Preemptions " << tasks[i].preemptions;
+        output_file << ":\t # Missed Deadlines " << tasks[i].missed_deadlines;
+
+        if (tasks[i].priority == 0){
+            output_file << ":\t Response Time " << tasks[i].response_time << " ms";
+        }
+
+        output_file << endl;
+
+        total_miss += tasks[i].missed_deadlines;
+        total_preempt += tasks[i].preemptions;
+    }
+
+    //Total - # of preemptions - # missed deadlines -
+    output_file << endl;
+    output_file << "TOTALS:" << endl;
+    output_file << "Total Preemptions: \t\t" <<total_preempt << endl;
+    output_file << "Total Missed Deadlines: " << total_miss << endl;
 }
