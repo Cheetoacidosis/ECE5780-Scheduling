@@ -9,43 +9,65 @@
 
 using namespace std;
 
-void LLFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* periodic_tasks) {
+void LLFScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic, int sim_time, Task* periodic_tasks, Task* aperiodic_tasks) {
    // Output header
    output_file << "#######################################" << endl;
    output_file << "LLF SCHEDULER" << endl;
    output_file << "#######################################" << endl;
+   
+   // Initialize task list with periodic tasks
+   Task* tasks = new Task[num_tasks + num_tasks_aperiodic];
+   for (int i = 0; i < num_tasks; i++) {
+      tasks[i] = periodic_tasks[i];
 
-   // Copy tasks so we don't fuck em up for the other algorithms
-   // Task* tasks = new Task[num_tasks];
-   // for (int i = 0; i < num_tasks; i++) {
-   //    tasks[i] = periodic_tasks[i];
-   // }
-   
-   Task* tasks = periodic_tasks;
-   
-   // Set initial deadline and priority
-   for (int i = 0; i < num_tasks; i++){
-      tasks[i].deadline = tasks[i].period;
       tasks[i].priority = tasks[i].exe_time;
-      tasks[i].remaining_exe_time = tasks[i].exe_time;
+
       tasks[i].preemptions = 0;
       tasks[i].missed_deadlines = 0;
       tasks[i].response_time = 0;
+
+      tasks[i].remaining_exe_time = tasks[i].exe_time;
+      tasks[i].deadline = tasks[i].period;
+   }
+   
+   // Add aperiodic tasks to task list and initialize
+   for (int i = 0; i < num_tasks_aperiodic; i++) {
+      tasks[num_tasks + i] = aperiodic_tasks[i];
+
+      tasks[num_tasks + i].priority = INT32_MAX;
+
+      tasks[num_tasks + i].preemptions = 0;
+      tasks[num_tasks + i].missed_deadlines = 0;
+      tasks[num_tasks + i].response_time = 0;
+
+      tasks[num_tasks + i].remaining_exe_time = tasks[num_tasks + i].exe_time;
+      tasks[num_tasks + i].deadline = tasks[num_tasks + i].release_time + 500;
    }
 
-   output_file << "##### CREATURE REPORT #####" << endl;
-   for (int i = 0; i < num_tasks; i++) {
-      output_file << "Task: " << tasks[i].ID << "\t";
-      output_file << "Period: " << tasks[i].period << "\t";
-      output_file << endl;
+   if (DEBUG) {
+      output_file << "##### CREATURE REPORT #####" << endl;
+      for (int i = 0; i < num_tasks; i++) {
+         output_file << "Task: " << tasks[i].ID << "\t";
+         // output_file << "Period: " << tasks[i].period << "\t";
+         output_file << endl;
+      }
    }
    
    // Initialize ready and not ready queues
-   list<Task*> ready;                      //TODO: Ideally, I'd like these to be lists of pointers,
-   list<Task*> not_ready;                  //but I don't think I have time to refactor shit
+   list<Task*> ready;
+   list<Task*> not_ready;
    list<Task*>::iterator task_it;
    for (int i = 0; i < num_tasks; i++) {
-      ready.push_back(&periodic_tasks[i]);
+      ready.push_back(&tasks[i]);
+   }
+
+   for (int i = 0; i < num_tasks_aperiodic; i++) {
+      if (tasks[i + num_tasks].release_time == 0) {
+         ready.push_back(&tasks[i + num_tasks]);
+      }
+      else {
+         not_ready.push_back(&tasks[i + num_tasks]);
+      }
    }
    
    // Schedule tasks
@@ -62,7 +84,14 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* peri
          if ((*task_it)->deadline < tick){
             (*task_it)->missed_deadlines++;
             total_missed_deadlines++;
-            (*task_it)->deadline += (*task_it)->period;
+
+            // If task is periodic, update deadline, otherwise kill it :(
+            if ((*task_it)->period != 0) {
+               (*task_it)->deadline += (*task_it)->period;
+            }
+            else {
+               ready.erase(task_it);
+            }
 
             if (!DEBUG) {
                output_file << "Task " << (*task_it)->ID << "missed deadline" << ":\t";
@@ -71,28 +100,50 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* peri
       }
       
       // Update ready queue
-      for (task_it = not_ready.begin(); task_it != not_ready.end();) {
-         if (tick % (*task_it)->period == 0) {
-            ready.push_back((*task_it));
-            if (task_it == --not_ready.end()) { // This is so it doesn't get mad when deleting the last element
-               not_ready.clear();
-               task_it = not_ready.end();
+      for (task_it = not_ready.begin(); task_it != not_ready.end();) {  // No expression because items could be removed from list in the loop and just increasing after that would be bad
+         // If the task is periodic, check if it's ready to release again
+         if ((*task_it)->period != 0) {
+            if (tick % (*task_it)->period == 0) {
+               ready.push_back((*task_it));
+               if (task_it == --not_ready.end()) { // This is so it doesn't get mad if it tries to delete the last element in not_ready
+                  not_ready.clear();
+                  task_it = not_ready.end();
+               }
+               else {
+                  task_it = not_ready.erase(task_it); // Erase current item and get next item in list
+               }
+
+               if (DEBUG) {
+                  output_file << (*task_it)->ID << (*task_it)->period << endl;
+               }
             }
             else {
-               task_it = not_ready.erase(task_it); // Get the next position after erasing the task pointer
-            }
-            if (DEBUG) {
-               output_file << (*task_it)->ID << (*task_it)->period << endl;
+               task_it++;
             }
          }
+         // If the task is aperiodic, check if it's time to release
          else {
-            task_it++;
+            if ((*task_it)->release_time == tick) {
+               ready.push_back((*task_it));
+               if (task_it == --not_ready.end()) { // This is so it doesn't get mad if it tries to delete the last element in not_ready
+                  not_ready.clear();
+                  task_it = not_ready.end();
+               }
+               else {
+                  task_it = not_ready.erase(task_it); // Erase current item and get next item in list
+               }
+            }
+            else {
+               task_it++;
+            }
          }
       }
       
-      // Update task priorities
+      // Update task priorities (only for periodic tasks)
       for(task_it = ready.begin(); task_it != ready.end(); task_it++) {
-         (*task_it)->priority = (*task_it)->deadline - tick - (*task_it)->remaining_exe_time;
+         if ((*task_it)->period != 0) {
+            (*task_it)->priority = (*task_it)->deadline - tick - (*task_it)->remaining_exe_time;
+         }
       }
 
       if (DEBUG) {
@@ -106,45 +157,44 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* peri
          }
          output_file << "--- Ready tasks ---" << endl;
          for(task_it = ready.begin(); task_it != ready.end(); task_it++) {
-            output_file << (*task_it)->ID << ":" << (*task_it)->priority << "\t";
+            output_file << (*task_it)->ID << ":" << (*task_it)->remaining_exe_time << "\t";
          }
          output_file << endl;
 
          output_file << "--- Not ready tasks ---" << endl;
          for(task_it = not_ready.begin(); task_it != not_ready.end(); task_it++) {
-            output_file << (*task_it)->ID << ":" << (*task_it)->priority << "\t";
+            output_file << (*task_it)->ID << ":" << (*task_it)->remaining_exe_time << "\t";
          }
          output_file << endl << endl;
       }
 
-      /***** Get next task *****/
+      // Prepare to get next task
       int curr_task_priority = INT32_MAX;
       if (current_task != NULL) {
          curr_task_priority = current_task->priority;
       }
       
-      // Check priority of all ready tasks
+      // Check priority of all ready tasks- should current be pre-empted?
       Task* new_curr_task = NULL;
       for (task_it = ready.begin(); task_it != ready.end(); task_it++) {
-         if ((*task_it)->priority < curr_task_priority) {   //NOTE: the lowest number is highest priority, because it indicates how much slack the task has
+         if ((*task_it)->priority <= curr_task_priority) {   //NOTE: the lowest number is highest priority, because it indicates how much slack the task has
             new_curr_task = *task_it;
             curr_task_priority = (*task_it)->priority;
          }
       }
 
-      // Update current task
+      // Update current task if necessary
       if (new_curr_task != NULL) {
          if (current_task != NULL) {
             current_task->preemptions++;
             total_preemptions++;
             if (!DEBUG) {
-               output_file << "Task " << current_task->ID << " was preempted by Task " << new_curr_task->ID << current_task->preemptions << ":\t";
+               output_file << "Task " << current_task->ID << " was pre-empted by Task " << new_curr_task->ID << ":\t";
             }
             ready.push_back(current_task);
          }
          current_task = new_curr_task;
          ready.remove(new_curr_task);
-         // ready.remove_if([new_curr_task](const Task* current_task) {return current_task->ID == new_curr_task->ID;});
       }
 
       // Write to output file
@@ -169,33 +219,25 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* peri
             current_task = NULL;
          }
       }
-   }
 
-   // Task* completed_tasks = new Task[num_tasks];
-   // int i = 0;
-   // for (task_it = ready.begin(); task_it != ready.end(); task_it++) {
-   //    completed_tasks[i] = *task_it;
-   //    i++;
-   // }
-   // for (task_it = not_ready.begin(); task_it != not_ready.end(); task_it++) {
-   //    completed_tasks[i] = *task_it;
-   //    i++;
-   // }
-   // if (current_task != NULL) {
-   //    completed_tasks[i] = *current_task;
-   // }
+      // Update response time of all aperiodic tasks
+      for (task_it = ready.begin(); task_it != ready.end(); task_it++) {
+         if ((*task_it)->period == 0) {
+            (*task_it)->response_time++;
+         }
+      }
+   }
 
    // Report summary
    output_file << "################ SUMMARY ################" << endl;
-   for (int i = 0; i < num_tasks; i++) {
+   for (int i = 0; i < num_tasks + num_tasks_aperiodic; i++) {
       output_file << "Task ID " << tasks[i].ID << ": ";
-      output_file << tasks[i].preemptions << " preemptions, ";
+      output_file << tasks[i].preemptions << " pre-emptions, ";
       output_file << tasks[i].missed_deadlines << " missed deadlines" << endl;
    }
    output_file << "################ TOTALS #################" << endl;
-   output_file << "Total preemptions: " << total_preemptions << endl;
+   output_file << "Total pre-emptions: " << total_preemptions << endl;
    output_file << "Total missed deadlines: " << total_missed_deadlines << endl;
 
-   // delete tasks;
    return;
 }
