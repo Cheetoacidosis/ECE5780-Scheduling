@@ -43,6 +43,7 @@ void RMScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic, 
         int pri = tasks[i].priority;
         if (pri == 0){
             not_readyq.push_back(i);
+            tasks[i].response_time = -1;
         }
         else { 
             readyq[pri].push_back(i);
@@ -70,7 +71,7 @@ void RMScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic, 
             not_readyq.push_back(running_task);
             //If aperiodic, track the response time
             if (priority == 0){
-                tasks[running_task].response_time = tick - tasks[running_task].release_time;
+                tasks[running_task].response_time = tick - tasks[running_task].release_time + 1;
             }
             
             //Clear the running_task
@@ -318,7 +319,13 @@ void PrintSummary(ofstream &output_file, Task* tasks, int num_tasks){
         output_file << ":\t # Missed Deadlines " << tasks[i].missed_deadlines;
 
         if (tasks[i].priority == 0){
-            output_file << ":\t Response Time " << tasks[i].response_time << " ms";
+
+            output_file << ":\t Response Time " ;
+            if (tasks[i].response_time == -1){
+                output_file << "DNF";
+            } else {
+                output_file << tasks[i].response_time << " ms";
+            }
         }
 
         output_file << endl;
