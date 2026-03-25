@@ -308,7 +308,8 @@ void PrintSummary(ofstream &output_file, Task* tasks, int num_tasks){
     output_file << "#######################################" << endl;
     output_file << "SUMMARY: " << endl;
 
-    int total_preempt, total_miss = 0;
+    int total_preempt = 0;
+    int total_miss = 0;
 
     //Task - # of preemptions - # missed deadlines - (aperiod) response time
     for (int i = 0; i < num_tasks; i++){
