@@ -32,12 +32,21 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* peri
       tasks[i].missed_deadlines = 0;
       tasks[i].response_time = 0;
    }
+
+   output_file << "##### CREATURE REPORT #####" << endl;
+   for (int i = 0; i < num_tasks; i++) {
+      output_file << "Task: " << tasks[i].ID << "\t";
+      output_file << "Period: " << tasks[i].period << "\t";
+      output_file << endl;
+   }
    
    // Initialize ready and not ready queues
-   list<Task> ready;                      //TODO: Ideally, I'd like these to be lists of pointers,
-   list<Task> not_ready;                  //but I don't think I have time to refactor shit
-   list<Task>::iterator task_it;
-   ready.assign(tasks, tasks+num_tasks);
+   list<Task*> ready;                      //TODO: Ideally, I'd like these to be lists of pointers,
+   list<Task*> not_ready;                  //but I don't think I have time to refactor shit
+   list<Task*>::iterator task_it;
+   for (int i = 0; i < num_tasks; i++) {
+      ready.push_back(&periodic_tasks[i]);
+   }
    
    // Schedule tasks
    Task* current_task = NULL;
@@ -50,39 +59,60 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* peri
       }
       // Check for missed deadlines
       for (task_it = ready.begin(); task_it != ready.end(); task_it++){
-         if (task_it->deadline < tick){
-            task_it->missed_deadlines++;
+         if ((*task_it)->deadline < tick){
+            (*task_it)->missed_deadlines++;
             total_missed_deadlines++;
-            task_it->deadline += task_it->period;
+            (*task_it)->deadline += (*task_it)->period;
 
             if (!DEBUG) {
-               output_file << "Task " << task_it->ID << "missed deadline" << ":\t";
+               output_file << "Task " << (*task_it)->ID << "missed deadline" << ":\t";
             }
          }
       }
       
-      // Update ready queue using erase-remove idiom
-      list<Task>::iterator new_logical_end = remove_if(not_ready.begin(), not_ready.end(), [tick](Task nr_task){return tick % nr_task.period == 0;});
-      for(task_it = new_logical_end; task_it != not_ready.end(); task_it++) {
-         ready.push_front(*task_it);
+      // Update ready queue
+      for (task_it = not_ready.begin(); task_it != not_ready.end();) {
+         if (tick % (*task_it)->period == 0) {
+            ready.push_back((*task_it));
+            if (task_it == --not_ready.end()) { // This is so it doesn't get mad when deleting the last element
+               not_ready.clear();
+               task_it = not_ready.end();
+            }
+            else {
+               task_it = not_ready.erase(task_it); // Get the next position after erasing the task pointer
+            }
+            if (DEBUG) {
+               output_file << (*task_it)->ID << (*task_it)->period << endl;
+            }
+         }
+         else {
+            task_it++;
+         }
       }
-      not_ready.erase(new_logical_end, not_ready.end());
       
       // Update task priorities
       for(task_it = ready.begin(); task_it != ready.end(); task_it++) {
-         task_it->priority = task_it->deadline - tick - task_it->remaining_exe_time;
+         (*task_it)->priority = (*task_it)->deadline - tick - (*task_it)->remaining_exe_time;
       }
 
       if (DEBUG) {
+         output_file << "Tick " << tick << endl;
+         output_file << "--- Current task ---" << endl;
+         if (current_task != NULL) {
+            output_file << current_task->ID << endl;
+         }
+         else {
+            output_file << "None" << endl;
+         }
          output_file << "--- Ready tasks ---" << endl;
          for(task_it = ready.begin(); task_it != ready.end(); task_it++) {
-            output_file << task_it->ID << ":" << task_it->priority << "\t";
+            output_file << (*task_it)->ID << ":" << (*task_it)->priority << "\t";
          }
          output_file << endl;
 
          output_file << "--- Not ready tasks ---" << endl;
          for(task_it = not_ready.begin(); task_it != not_ready.end(); task_it++) {
-            output_file << task_it->ID << ":" << task_it->priority << "\t";
+            output_file << (*task_it)->ID << ":" << (*task_it)->priority << "\t";
          }
          output_file << endl << endl;
       }
@@ -96,24 +126,25 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* peri
       // Check priority of all ready tasks
       Task* new_curr_task = NULL;
       for (task_it = ready.begin(); task_it != ready.end(); task_it++) {
-         if (task_it->priority < curr_task_priority) {   //NOTE: the lowest number is highest priority, because it indicates how much slack the task has
-            new_curr_task = &(*task_it);
-            curr_task_priority = task_it->priority;
+         if ((*task_it)->priority < curr_task_priority) {   //NOTE: the lowest number is highest priority, because it indicates how much slack the task has
+            new_curr_task = *task_it;
+            curr_task_priority = (*task_it)->priority;
          }
       }
 
       // Update current task
       if (new_curr_task != NULL) {
          if (current_task != NULL) {
-            ready.push_front(*current_task);
             current_task->preemptions++;
+            total_preemptions++;
             if (!DEBUG) {
                output_file << "Task " << current_task->ID << " was preempted by Task " << new_curr_task->ID << current_task->preemptions << ":\t";
             }
-            total_preemptions++;
+            ready.push_back(current_task);
          }
          current_task = new_curr_task;
-         ready.remove_if([&](const Task& t) {return t.ID == new_curr_task->ID;});; // This is really scary, so if tasks are randomly disappearing, this is prob why
+         ready.remove(new_curr_task);
+         // ready.remove_if([new_curr_task](const Task* current_task) {return current_task->ID == new_curr_task->ID;});
       }
 
       // Write to output file
@@ -134,32 +165,32 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* peri
          if (current_task->remaining_exe_time == 0) {
             current_task->deadline += current_task->period;
             current_task->remaining_exe_time = current_task->exe_time;
-            not_ready.push_front(*current_task);
+            not_ready.push_back(current_task);
             current_task = NULL;
          }
       }
    }
 
-   Task* completed_tasks = new Task[num_tasks];
-   int i = 0;
-   for (task_it = ready.begin(); task_it != ready.end(); task_it++) {
-      completed_tasks[i] = *task_it;
-      i++;
-   }
-   for (task_it = not_ready.begin(); task_it != not_ready.end(); task_it++) {
-      completed_tasks[i] = *task_it;
-      i++;
-   }
-   if (current_task != NULL) {
-      completed_tasks[i] = *current_task;
-   }
+   // Task* completed_tasks = new Task[num_tasks];
+   // int i = 0;
+   // for (task_it = ready.begin(); task_it != ready.end(); task_it++) {
+   //    completed_tasks[i] = *task_it;
+   //    i++;
+   // }
+   // for (task_it = not_ready.begin(); task_it != not_ready.end(); task_it++) {
+   //    completed_tasks[i] = *task_it;
+   //    i++;
+   // }
+   // if (current_task != NULL) {
+   //    completed_tasks[i] = *current_task;
+   // }
 
    // Report summary
    output_file << "################ SUMMARY ################" << endl;
    for (int i = 0; i < num_tasks; i++) {
-      output_file << "Task ID " << completed_tasks[i].ID << ": ";
-      output_file << completed_tasks[i].preemptions << " preemptions, ";
-      output_file << completed_tasks[i].missed_deadlines << " missed deadlines" << endl;
+      output_file << "Task ID " << tasks[i].ID << ": ";
+      output_file << tasks[i].preemptions << " preemptions, ";
+      output_file << tasks[i].missed_deadlines << " missed deadlines" << endl;
    }
    output_file << "################ TOTALS #################" << endl;
    output_file << "Total preemptions: " << total_preemptions << endl;
