@@ -14,6 +14,7 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic,
    output_file << "#######################################" << endl;
    output_file << "LLF SCHEDULER" << endl;
    output_file << "#######################################" << endl;
+   output_file << "Tick:\tWarning messages (if applicable):\tTask ID" << endl;
    
    // Initialize task list with periodic tasks
    Task* tasks = new Task[num_tasks + num_tasks_aperiodic];
@@ -42,15 +43,6 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic,
 
       tasks[num_tasks + i].remaining_exe_time = tasks[num_tasks + i].exe_time;
       tasks[num_tasks + i].deadline = tasks[num_tasks + i].release_time + 500;
-   }
-
-   if (DEBUG) {
-      output_file << "##### CREATURE REPORT #####" << endl;
-      for (int i = 0; i < num_tasks; i++) {
-         output_file << "Task: " << tasks[i].ID << "\t";
-         // output_file << "Period: " << tasks[i].period << "\t";
-         output_file << endl;
-      }
    }
    
    // Initialize ready and not ready queues
@@ -85,16 +77,17 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic,
             (*task_it)->missed_deadlines++;
             total_missed_deadlines++;
 
-            // If task is periodic, update deadline, otherwise kill it :(
+            // If task is periodic, update deadline, otherwise move it to not ready
             if ((*task_it)->period != 0) {
                (*task_it)->deadline += (*task_it)->period;
             }
             else {
+               not_ready.push_back(*task_it);
                ready.erase(task_it);
             }
 
             if (!DEBUG) {
-               output_file << "Task " << (*task_it)->ID << "missed deadline" << ":\t";
+               output_file << "!" << (*task_it)->ID << " missed deadline" << " : \t";
             }
          }
       }
@@ -105,16 +98,12 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic,
          if ((*task_it)->period != 0) {
             if (tick % (*task_it)->period == 0) {
                ready.push_back((*task_it));
-               if (task_it == --not_ready.end()) { // This is so it doesn't get mad if it tries to delete the last element in not_ready
+               if (not_ready.size() == 1) { // This is so it doesn't get mad if it tries to delete the last element in not_ready
                   not_ready.clear();
                   task_it = not_ready.end();
                }
                else {
                   task_it = not_ready.erase(task_it); // Erase current item and get next item in list
-               }
-
-               if (DEBUG) {
-                  output_file << (*task_it)->ID << (*task_it)->period << endl;
                }
             }
             else {
@@ -146,28 +135,6 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic,
          }
       }
 
-      if (DEBUG) {
-         output_file << "Tick " << tick << endl;
-         output_file << "--- Current task ---" << endl;
-         if (current_task != NULL) {
-            output_file << current_task->ID << endl;
-         }
-         else {
-            output_file << "None" << endl;
-         }
-         output_file << "--- Ready tasks ---" << endl;
-         for(task_it = ready.begin(); task_it != ready.end(); task_it++) {
-            output_file << (*task_it)->ID << ":" << (*task_it)->remaining_exe_time << "\t";
-         }
-         output_file << endl;
-
-         output_file << "--- Not ready tasks ---" << endl;
-         for(task_it = not_ready.begin(); task_it != not_ready.end(); task_it++) {
-            output_file << (*task_it)->ID << ":" << (*task_it)->remaining_exe_time << "\t";
-         }
-         output_file << endl << endl;
-      }
-
       // Prepare to get next task
       int curr_task_priority = INT32_MAX;
       if (current_task != NULL) {
@@ -189,7 +156,7 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic,
             current_task->preemptions++;
             total_preemptions++;
             if (!DEBUG) {
-               output_file << "Task " << current_task->ID << " was pre-empted by Task " << new_curr_task->ID << ":\t";
+               output_file << "!" << current_task->ID << " pre-empted" << ":\t";
             }
             ready.push_back(current_task);
          }
@@ -200,11 +167,21 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic,
       // Write to output file
       if (!DEBUG) {
          if (current_task != NULL) {
-            output_file << "Task " << current_task->ID << " is running" << endl;;
+            output_file << current_task->ID << endl;;
          }
          else {
-            output_file << "Nothing is running" << endl;;
+            output_file << "NO RUNNING TASK - SLACK" << endl;;
          }
+      }
+
+      // Update response time of all aperiodic tasks
+      for (task_it = ready.begin(); task_it != ready.end(); task_it++) {
+         if ((*task_it)->period == 0) {
+            (*task_it)->response_time++;
+         }
+      }
+      if (current_task != NULL) {
+         current_task->response_time++;
       }
 
       // Update execution time of current task
@@ -219,21 +196,18 @@ void LLFScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic,
             current_task = NULL;
          }
       }
-
-      // Update response time of all aperiodic tasks
-      for (task_it = ready.begin(); task_it != ready.end(); task_it++) {
-         if ((*task_it)->period == 0) {
-            (*task_it)->response_time++;
-         }
-      }
    }
 
    // Report summary
    output_file << "################ SUMMARY ################" << endl;
    for (int i = 0; i < num_tasks + num_tasks_aperiodic; i++) {
       output_file << "Task ID " << tasks[i].ID << ": ";
-      output_file << tasks[i].preemptions << " pre-emptions, ";
-      output_file << tasks[i].missed_deadlines << " missed deadlines" << endl;
+      output_file  << "Number of pre-emptions: "<< tasks[i].preemptions << "\t";
+      output_file << "Number of missed deadlines: " << tasks[i].missed_deadlines << "\t";
+      if (tasks[i].period == 0) {
+         output_file << "Response time: " << tasks[i].response_time << "ms";
+      }
+      output_file << endl;
    }
    output_file << "################ TOTALS #################" << endl;
    output_file << "Total pre-emptions: " << total_preemptions << endl;
