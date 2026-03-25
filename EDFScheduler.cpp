@@ -63,7 +63,7 @@ void EDFScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic,
     //release new jobs
     for (int tick = 0; tick < sim_time; tick++) {
 
-        // Release aperiodic tasks
+        //release aperiodic tasks
         {
             auto it = not_readyq.begin();
             while (it != not_readyq.end()) {
@@ -79,7 +79,7 @@ void EDFScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic,
             }
         }
 
-        // Release periodic tasks
+        //release periodic tasks
         for (int i = 0; i < num_tasks; i++) {
             if (tick != 0 && tick % tasks[i].period == 0) {
 
@@ -147,6 +147,13 @@ void EDFScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic,
     }
 
     output_file << "\nEDF summary\n";
+
+    //prints number of misses/preempts for each task
+    for (int i = 0; i < TOTAL; i++) {
+        output_file << "Task " << tasks[i].ID
+                    << " | Preemptions: " << tasks[i].preemptions
+                    << " | Misses: " << tasks[i].missed_deadlines << "\n";
+    }
 
     output_file << "Total Preemptions: " << total_preemptions << "\n";
     output_file << "Total Misses: " << total_misses << "\n";
