@@ -1,6 +1,10 @@
 #include "EDFScheduler.h"
 #include <list>
+#include <algorithm> //No code is complete without Al Gor
 #include <limits>
+
+int total_preemptions = 0;
+int total_misses = 0;
 
 //find task with earliest absolute deadline
 int FindEDFTask(list<int>& readyq, Task* tasks) {
@@ -9,50 +13,88 @@ int FindEDFTask(list<int>& readyq, Task* tasks) {
 
     for (int t : readyq) {
         if (tasks[t].deadline < ED) {
-            ED = tasks[t].deadline;
+            ED =tasks[t].deadline;
             earlyBird = t;
         }
     }
     return earlyBird;
 }
 
-void EDFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* tasks){
+void EDFScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic, int sim_time, Task* periodic_tasks, Task* aperiodic_tasks){
 
     output_file << "Earliest deadline first scheduler\n";
     output_file << "time: running task\n";
 
+    int TOTAL = num_tasks + num_tasks_aperiodic;
+
+    //Combine all tasks into a single array
+    Task* tasks = new Task[TOTAL];
+    copy(periodic_tasks, periodic_tasks + num_tasks, tasks);
+    copy(aperiodic_tasks, aperiodic_tasks + num_tasks_aperiodic, tasks + num_tasks);
+
     list<int> readyq;
     list<int> not_readyq;
 
-    //release
+    //initialize periodic tasks
     for (int i = 0; i < num_tasks; i++) {
         tasks[i].remaining_exe_time = tasks[i].exe_time;
         tasks[i].deadline = tasks[i].period; //first deadline
+        tasks[i].release_time = 0;
+        tasks[i].priority = 1;                   
         readyq.push_back(i);
+    }
+
+    //initialize aperiodic tasks
+    for (int i = num_tasks; i < TOTAL; i++) {
+        tasks[i].remaining_exe_time = tasks[i].exe_time;
+        tasks[i].deadline = tasks[i].release_time + 500;
+        tasks[i].priority = 0;                    
+        not_readyq.push_back(i);
+    }
+
+    //release
+    for (int i = 0; i < num_tasks; i++) {
+       tasks[i].remaining_exe_time = tasks[i].exe_time;
+       tasks[i].deadline = tasks[i].period; //first deadline
     }
 
     int running_task = -1;
 
+    //release new jobs
     for (int tick = 0; tick < sim_time; tick++) {
 
-        //release new jobs
+        // Release aperiodic tasks
+        {
+            auto it = not_readyq.begin();
+            while (it != not_readyq.end()) {
+                int idx = *it;
+                if (tasks[idx].release_time == tick) {
+                    tasks[idx].remaining_exe_time = tasks[idx].exe_time;
+                    tasks[idx].deadline = tick + 500;
+                    readyq.push_back(idx);
+
+                    it = not_readyq.erase(it);
+                }
+                else ++it;
+            }
+        }
+
+        // Release periodic tasks
         for (int i = 0; i < num_tasks; i++) {
             if (tick != 0 && tick % tasks[i].period == 0) {
 
-                //oops there it goes
                 if (tasks[i].remaining_exe_time > 0) {
                     tasks[i].missed_deadlines++;
-                    output_file << "! Task " << tasks[i].ID << " Missed deadline\n";
+                    total_misses++;
+                    output_file << "! Task " << tasks[i].ID
+                                << " missed its deadline\n";
                 }
 
-                //Reset job
                 tasks[i].remaining_exe_time = tasks[i].exe_time;
                 tasks[i].deadline = tick + tasks[i].period;
 
-                //fixed
-                if (find(readyq.begin(), readyq.end(), i) == readyq.end()) {
+                if (find(readyq.begin(), readyq.end(), i) == readyq.end())
                     readyq.push_back(i);
-                }
             }
         }
 
@@ -61,12 +103,13 @@ void EDFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* task
 
         //Preemption check
         if (running_task != -1 && next_task != -1 &&
-            tasks[next_task].deadline < tasks[running_task].deadline) {
+                tasks[next_task].deadline < tasks[running_task].deadline) {
 
             output_file << "! Task " << tasks[running_task].ID
                         << " Preempted by task " << tasks[next_task].ID << "\n";
 
-            tasks[running_task].preemptions++;
+           tasks[running_task].preemptions++;
+           total_preemptions++; 
             readyq.push_back(running_task);
             running_task = -1;
         }
@@ -79,8 +122,7 @@ void EDFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* task
 
         //Execute
         if (running_task != -1) {
-            tasks[running_task].remaining_exe_time--;
-
+           tasks[running_task].remaining_exe_time--;
         }
 
         // //Finished execution
@@ -93,9 +135,9 @@ void EDFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* task
             output_file << tick << ":\t No running task; Slack\n";
         } else {
             output_file << tick << ":\t" 
-                        << tasks[running_task].ID 
+                        <<tasks[running_task].ID 
                         << ":\t" 
-                        << tasks[running_task].remaining_exe_time << "\n";
+                        <<tasks[running_task].remaining_exe_time << "\n";
         }
 
         //check if finished
@@ -105,18 +147,6 @@ void EDFScheduler(ofstream &output_file, int num_tasks, int sim_time, Task* task
     }
 
     output_file << "\nEDF summary\n";
-
-    int total_preemptions = 0;
-    int total_misses = 0;
-
-    for (int i = 0; i < num_tasks; i++) {
-        output_file << "Task " << tasks[i].ID
-                    << " | Preemptions: " << tasks[i].preemptions
-                    << " | Misses: " << tasks[i].missed_deadlines << "\n";
-
-        total_preemptions += tasks[i].preemptions;
-        total_misses += tasks[i].missed_deadlines;
-    }
 
     output_file << "Total Preemptions: " << total_preemptions << "\n";
     output_file << "Total Misses: " << total_misses << "\n";

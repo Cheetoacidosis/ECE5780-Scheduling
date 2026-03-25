@@ -3,8 +3,12 @@
 
 #include <fstream>
 #include "datatypes.h"
-using namespace std;
 
-void EDFScheduler(std::ofstream &output_file, int num_tasks, int sim_time, Task* tasks);
+void EDFScheduler(ofstream &output_file,
+                  int num_tasks,
+                  int num_aperiodic,
+                  int sim_time,
+                  Task* periodic_tasks,
+                  Task* aperiodic_tasks);
 
 #endif

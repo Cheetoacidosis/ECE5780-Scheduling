@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
     RMScheduler(output_file, num_tasks, num_tasks_aperiodic, sim_time, periodic_tasks, aperiodic_tasks);
 
     //Simulate EDF scheduling & write to output file
-    // EDFScheduler(output_file, num_tasks, sim_time, periodic_tasks);
+    //EDFScheduler(output_file, num_tasks, num_tasks_aperiodic, sim_time, periodic_tasks, aperiodic_tasks);
 
     //Simulate LLF scheduling and write to output file
     // LLFScheduler(output_file, num_tasks, sim_time, periodic_tasks);
