@@ -4,6 +4,6 @@
 #include <fstream>
 #include "datatypes.h"
 
-void LLFScheduler(std::ofstream &output_file, int num_tasks, int sim_time, Task* tasks);
+void LLFScheduler(ofstream &output_file, int num_tasks, int num_tasks_aperiodic, int sim_time, Task* periodic_tasks, Task* aperiodic_tasks);
 
 #endif
